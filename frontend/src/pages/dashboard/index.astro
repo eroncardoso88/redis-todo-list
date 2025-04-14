@@ -1,4 +1,6 @@
 ---
+import { QueryProvider } from '@/frontend/src/components/providers/query-provider';
+import { TodoList } from '@/frontend/src/components/todos/todo-list';
 import DashboardLayout from '../../layouts/dashboard-layout.astro';
 import { isAuthenticated } from '../../middleware/auth';
 
@@ -9,8 +11,14 @@ if (!authenticated) {
 
 ---
 
-<DashboardLayout title="Todos Overview">
-  <div class="bg-white shadow sm:rounded-lg">
-    Logged in
+<DashboardLayout title="Todo Dashboard">
+  <div class="py-6">
+    <div class="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
+      <h1 class="text-2xl font-semibold text-gray-900 mb-6">Your Tasks</h1>
+      
+      <QueryProvider client:load>
+        <TodoList client:load />
+      </QueryProvider>
+    </div>
   </div>
 </DashboardLayout>
