@@ -1,0 +1,34 @@
+---
+import MainLayout from '../layouts/main-layout.astro';
+import { SignupForm } from '../components/auth/signup-form';
+import { isAuthenticated } from '../middleware/auth';
+
+const authenticated = await isAuthenticated(Astro.request);
+if (authenticated) {
+  return Astro.redirect('/dashboard');
+}
+
+
+---
+
+<MainLayout title="Create Account">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create a new account
+        </h2>
+      </div>
+      <SignupForm client:load/>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  // Client-side redirect if already logged in
+  import authService from '../services/auth-service';
+  
+  if (authService.isAuthenticated()) {
+    window.location.href = '/dashboard';
+  }
+</script>
