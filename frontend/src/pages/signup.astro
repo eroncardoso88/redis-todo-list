@@ -1,20 +1,14 @@
 ---
 import MainLayout from '../layouts/main-layout.astro';
 import { SignupForm } from '../components/auth/signup-form';
-import { signupUser } from '../services/auth-service';
+import { isAuthenticated } from '../middleware/auth';
 
-if (Astro.request.headers.get('cookie')?.includes('authToken')) {
+const authenticated = await isAuthenticated(Astro.request);
+if (authenticated) {
   return Astro.redirect('/dashboard');
 }
 
-const handleSignup = async (userData) => {
-  try {
-    await signupUser(userData);
-    window.location.href = '/dashboard';
-  } catch (error) {
-    throw error;
-  }
-};
+
 ---
 
 <MainLayout title="Create Account">
@@ -25,13 +19,16 @@ const handleSignup = async (userData) => {
           Create a new account
         </h2>
       </div>
-      <SignupForm client:load onSubmit={handleSignup} />
+      <SignupForm client:load/>
     </div>
   </div>
 </MainLayout>
 
 <script>
-  if (localStorage.getItem('authToken')) {
+  // Client-side redirect if already logged in
+  import authService from '../services/auth-service';
+  
+  if (authService.isAuthenticated()) {
     window.location.href = '/dashboard';
   }
 </script>
