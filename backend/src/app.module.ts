@@ -4,9 +4,7 @@ import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
 import { DatabaseModule } from './database/database.module';
 import { RedisModule } from './redis/redis.module';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-
+import { UsersModule } from './users/users.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -16,6 +14,7 @@ import { AppService } from './app.service';
     DatabaseModule,
     RedisModule,
     AuthModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
