@@ -8,16 +8,18 @@ export class UsersController {
 
   @Post('register')
   async register(
-    @Body() createUserDto: { username: string; password: string },
+    @Body() createUserDto: { name: string; password: string, email: string },
   ) {
     const user = await this.usersService.create(
-      createUserDto.username,
+      createUserDto.name,
+      createUserDto.email,
       createUserDto.password,
     );
     
     return {
       id: user.id,
-      username: user.username,
+      email: user.email,
+      name: user.name,
     };
   }
 
@@ -26,7 +28,8 @@ export class UsersController {
   getProfile(@Request() req) {
     return {
       id: req.user.id,
-      username: req.user.username,
+      name: req.user.name,
+      email: req.user.email,
     };
   }
 }

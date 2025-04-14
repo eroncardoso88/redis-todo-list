@@ -47,7 +47,7 @@ export const appForm = createFormHook({
   },
   formComponents: {
     SubmitButton: (props) => (
-      <button {...props} className={defaultPrimaryButtonClasses} />
+      <button {...props} type={'submit'} className={defaultPrimaryButtonClasses} />
     ),
   },
   fieldContext,

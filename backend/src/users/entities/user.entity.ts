@@ -7,10 +7,13 @@ export class User {
   id: number;
 
   @Column({ unique: true })
-  username: string;
+  name: string;
 
   @Column()
   password: string;
+
+  @Column()
+  email: string;
 
   @Column({ default: true })
   isActive: boolean;

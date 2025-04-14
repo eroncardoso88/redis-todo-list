@@ -1,6 +1,7 @@
 // frontend/src/components/auth/signup-form.tsx
 
 import { appForm } from "@/src/components/form";
+import authService from "@/src/services/auth-service";
 import { useState } from "react";
 import { z } from "zod";
 
@@ -12,10 +13,6 @@ export interface SignupFormValues {
   confirmPassword: string;
 }
 
-type SignupFormProps = {
-  onSubmit: (values: SignupFormValues) => Promise<void>;
-};
-
 export const SignupFormObject = z.object({
   name: z.string().min(4, "Name must be at least 4 characters"),
   email: z.string().email("Please enter a valid email address"),
@@ -23,21 +20,28 @@ export const SignupFormObject = z.object({
   confirmPassword: z.string().min(8, "Password must be at least 8 characters"),
 });
 
-export const signupFormSchema = SignupFormObject.refine((data) => {
-  return data.password === data.confirmPassword;
-});
+export const signupFormSchema = SignupFormObject.refine(
+  (data) => {
+    const assert = data.password === data.confirmPassword;
+    return assert;
+  },
+  {
+    // Apply the error to the 'confirmPassword' field for better UX
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  }
+);
 
-export type InputName = z.infer<typeof SignupFormObject>
+export type InputName = z.infer<typeof SignupFormObject>;
 export type InputRenderForm = {
-  name: keyof InputName
+  name: keyof InputName;
   textFieldProps: HTMLInputElement & { label: string };
-}
+};
 
-export function SignupForm({ onSubmit }: SignupFormProps) {
+export function SignupForm() {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  // Fixed useForm with proper generic type
   const form = useAppForm({
     defaultValues: {
       name: "",
@@ -47,19 +51,25 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
     },
     validators: {
       onSubmit: signupFormSchema,
-      onBlur: signupFormSchema,
     },
     onSubmit: async ({ value }) => {
       if (value.password !== value.confirmPassword) {
         setError("Passwords do not match");
         return;
+
       }
+
+      const backendData = {
+        name: value.name,
+        password: value.password,
+        email: value.email,
+      };
 
       setError("");
       setIsLoading(true);
 
       try {
-        await onSubmit(value);
+        await authService.signupUser(backendData);
       } catch (err: any) {
         setError(err.message || "Signup failed. Please try again.");
       } finally {
@@ -82,68 +92,68 @@ export function SignupForm({ onSubmit }: SignupFormProps) {
         </div>
       )}
 
-      {([
-        {
-          name: "name",
-          textFieldProps: {
-            label: "Full name",
+      {(
+        [
+          {
+            name: "name",
+            textFieldProps: {
+              label: "Full name",
+            },
           },
-        },
-        {
-          name: "email",
-          textFieldProps: {
-            label: "Email",
-            type: "email",
-            placeholder: "exemplo@teste.com",
+          {
+            name: "email",
+            textFieldProps: {
+              label: "Email",
+              type: "email",
+              placeholder: "exemplo@teste.com",
+            },
           },
-        },
-        {
-          name: "password",
-          textFieldProps: {
-            label: "Password",
-            type: "password",
-            placeholder: "Telefone daquela namorada do passado",
+          {
+            name: "password",
+            textFieldProps: {
+              label: "Password",
+              type: "password",
+              placeholder: "Telefone daquela namorada do passado",
+            },
           },
-        },
-        {
-          name: "confirm password",
-          textFieldProps: {
-            label: "Confirm password",
-            type: "password",
-            placeholder: "Confirme",
+          {
+            name: "confirmPassword",
+            textFieldProps: {
+              label: "Confirm password",
+              type: "password",
+              placeholder: "Confirme",
+            },
           },
-        },
-      ] as InputRenderForm[]).map(
-        ({
-          name,
-          textFieldProps,
-        }) => (
-          <form.AppField
-            name={name}
-            validators={{
-              onBlur: (evt) => SignupFormObject.shape[name].safeParse(evt.value),
-            }}
-            // disableErrorFlat={true}
-            children={(field) => (
-              <field.TextField
-                field={field}
-                {...textFieldProps}
-              />
-            )}
-          />
-        )
-      )}
+        ] as InputRenderForm[]
+      ).map(({ name, textFieldProps }) => (
+        <form.AppField
+          name={name}
+          validators={{
+            onBlur: (evt) => {
+              const result = SignupFormObject.shape[name].safeParse(evt.value);
+              return result.success
+                ? undefined
+                : result.error.errors[0].message;
+            },
+          }}
+          children={(field) => (
+            <field.TextField field={field} {...textFieldProps} />
+          )}
+        />
+      ))}
 
-      <div>
-        <button
-          type="submit"
-          disabled={isLoading || !form.state.canSubmit}
-          className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-        >
-          {isLoading ? "Creating account..." : "Create account"}
-        </button>
-      </div>
-
+      <form.Subscribe
+        selector={(state) => [
+          state.canSubmit,
+          state.isSubmitting,
+          state.isDirty,
+        ]}
+        children={([canSubmit, isSubmitting, isDirty]) => (
+          <form.SubmitButton disabled={!canSubmit || !isDirty}>
+            {isSubmitting ? "Creating Account..." : "Create Account"}{" "}
+          </form.SubmitButton>
+        )}
+      />
       <div className="text-center mt-4">
         <p className="text-sm text-gray-600">
           Already have an account?{" "}

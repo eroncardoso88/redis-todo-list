@@ -10,21 +10,21 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async findOne(username: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({ where: { username } });
+  async findOne(name: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { name } });
   }
 
-  async findById(id: number): Promise<User | undefined> {
+  async findById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
   }
 
-  async create(username: string, password: string): Promise<User> {
-    const existingUser = await this.findOne(username);
+  async create(name: string, email: string, password: string): Promise<User> {
+    const existingUser = await this.findOne(name);
     if (existingUser) {
-      throw new ConflictException('Username already exists');
+      throw new ConflictException('Name already exists');
     }
 
-    const user = this.usersRepository.create({ username, password });
+    const user = this.usersRepository.create({ name, email, password });
     return this.usersRepository.save(user);
   }
 }
