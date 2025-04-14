@@ -51,16 +51,26 @@ export function LoginForm() {
         
         const user = await authService.loginUser(loginData);
         
-        const urlParams = new URLSearchParams(window.location.search);
-        const redirectUrl = urlParams.get('redirect') || '/dashboard';
+        // Verify data was properly stored before redirecting
+        console.log('Login successful, auth data:', {
+          token: !!localStorage.getItem('authToken'),
+          sessionId: !!localStorage.getItem('sessionId'),
+          user: localStorage.getItem('user')
+        });
         
-        window.location.href = redirectUrl;
+        // Small delay to ensure storage is updated
+        setTimeout(() => {
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlParams.get('redirect') || '/dashboard';
+          window.location.href = redirectUrl;
+        }, 1000);
+        
       } catch (err: any) {
         setError(err.message || "Login failed. Please try again.");
       } finally {
         setIsLoading(false);
       }
-    },
+    }
   });
 
   return (

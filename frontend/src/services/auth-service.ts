@@ -179,6 +179,35 @@ class AuthService {
       'Content-Type': 'application/json',
     };
   }
+
+  public isAuthenticatedFromBoth(): boolean {
+    const hasLocalStorage = !!this.getToken() && !!this.getSessionId();
+    const hasCookie = document.cookie.includes('authToken=');
+    
+    // If there's a mismatch, sync them
+    if (hasLocalStorage && !hasCookie) {
+      // Set cookie from localStorage
+      const token = this.getToken();
+      if (token) {
+        document.cookie = `authToken=${token}; path=/; max-age=86400`;
+      }
+    } else if (!hasLocalStorage && hasCookie) {
+      // Extract token from cookie and set localStorage
+      const cookieValue = this.getCookieValue('authToken');
+      if (cookieValue) {
+        // You'd need additional API calls to get session data
+        // For now, just indicate that cookies exist but localStorage doesn't
+        console.warn('Cookie exists but localStorage missing - user might need to login again');
+      }
+    }
+    
+    return hasLocalStorage;
+  }
+  
+  private getCookieValue(name: string): string | null {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
+  }
 }
 
 export const authService = new AuthService();

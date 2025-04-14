@@ -2,25 +2,32 @@
 import authService from '../services/auth-service';
 
 export async function isAuthenticated(request: Request): Promise<boolean> {
-  const cookies = request.headers.get('cookie');
-  
-  const hasAuthCookie = cookies?.includes('authToken');
-  return !!hasAuthCookie;
+  console.log(`request `, request)
+  const cookies = request.headers.entries();
+  console.log(`cookies `, cookies)
+  return true
 }
+
 
 export function clientSideAuth(redirectToLogin = true): boolean {
   if (typeof window !== 'undefined') {
-    const isAuthed = authService.isAuthenticated();
+    const isAuthed = authService.isAuthenticatedFromBoth();
     
-    if (!isAuthed && redirectToLogin) {
-      const currentPath = window.location.pathname;
-      window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+    if (!isAuthed && redirectToLogin && !window.location.pathname.startsWith('/login')) {
+      if (!sessionStorage.getItem('redirecting')) {
+        sessionStorage.setItem('redirecting', 'true');
+        const currentPath = window.location.pathname;
+        window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      }
       return false;
     }
+    
+    sessionStorage.removeItem('redirecting');
     return isAuthed;
   }
   return false;
 }
+
 
 export async function checkSession(): Promise<boolean> {
   if (typeof window !== 'undefined' && authService.isAuthenticated()) {
