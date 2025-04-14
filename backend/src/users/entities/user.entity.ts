@@ -1,5 +1,6 @@
 import * as bcrypt from 'bcrypt';
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Todo } from '../../todos/entities/todo.entity';
 
 @Entity()
 export class User {
@@ -17,6 +18,9 @@ export class User {
 
   @Column({ default: true })
   isActive: boolean;
+
+  @OneToMany(() => Todo, todo => todo.user)
+  todos: Todo[];
 
   @BeforeInsert()
   async hashPassword() {
