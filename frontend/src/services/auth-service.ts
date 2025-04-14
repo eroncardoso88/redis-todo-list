@@ -47,7 +47,7 @@ class AuthService {
     });
   }
 
-  private getToken(): string | null {
+  public getToken(): string | null {
     return localStorage.getItem('authToken');
   }
 
@@ -55,17 +55,23 @@ class AuthService {
     return localStorage.getItem('sessionId');
   }
 
+
   private setAuthData(token: string, sessionId: string, user: User): void {
     localStorage.setItem('authToken', token);
     localStorage.setItem('sessionId', sessionId);
     localStorage.setItem('user', JSON.stringify(user));
+    
+    document.cookie = `authToken=${token}; path=/; max-age=86400`; // 1 day
   }
-
+  
   private clearAuthData(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('user');
+    
+    document.cookie = 'authToken=; path=/; max-age=0';
   }
+  
 
   async loginUser(credentials: LoginCredentials): Promise<User> {
     try {
@@ -172,6 +178,35 @@ class AuthService {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     };
+  }
+
+  public isAuthenticatedFromBoth(): boolean {
+    const hasLocalStorage = !!this.getToken() && !!this.getSessionId();
+    const hasCookie = document.cookie.includes('authToken=');
+    
+    // If there's a mismatch, sync them
+    if (hasLocalStorage && !hasCookie) {
+      // Set cookie from localStorage
+      const token = this.getToken();
+      if (token) {
+        document.cookie = `authToken=${token}; path=/; max-age=86400`;
+      }
+    } else if (!hasLocalStorage && hasCookie) {
+      // Extract token from cookie and set localStorage
+      const cookieValue = this.getCookieValue('authToken');
+      if (cookieValue) {
+        // You'd need additional API calls to get session data
+        // For now, just indicate that cookies exist but localStorage doesn't
+        console.warn('Cookie exists but localStorage missing - user might need to login again');
+      }
+    }
+    
+    return hasLocalStorage;
+  }
+  
+  private getCookieValue(name: string): string | null {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? match[2] : null;
   }
 }
 

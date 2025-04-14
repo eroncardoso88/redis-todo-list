@@ -1,0 +1,75 @@
+---
+// src/pages/dashboard/settings.astro
+import DashboardLayout from '../../layouts/dashboard-layout.astro';
+import { isAuthenticated } from '../../middleware/auth';
+
+// Server-side protection
+const authenticated = await isAuthenticated(Astro.request);
+if (!authenticated) {
+  return Astro.redirect('/login?redirect=' + encodeURIComponent(Astro.url.pathname));
+}
+---
+
+<DashboardLayout title="Settings">
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">
+        Account Settings
+      </h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Manage your account preferences
+      </p>
+    </div>
+    <div class="border-t border-gray-200 px-4 py-5 sm:p-0">
+      <dl class="sm:divide-y sm:divide-gray-200">
+        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">
+            Email notifications
+          </dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <div class="flex items-center">
+              <input
+                id="notifications"
+                name="notifications"
+                type="checkbox"
+                class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              />
+              <label for="notifications" class="ml-2 block text-sm text-gray-900">
+                Receive email notifications
+              </label>
+            </div>
+          </dd>
+        </div>
+        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">
+            Two-factor authentication
+          </dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <button
+              type="button"
+              class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              Enable 2FA
+            </button>
+          </dd>
+        </div>
+        <div class="py-4 sm:py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">
+            Delete account
+          </dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <button
+              type="button"
+              class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            >
+              Delete my account
+            </button>
+            <p class="mt-1 text-xs text-gray-500">
+              This action cannot be undone. All your data will be permanently deleted.
+            </p>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</DashboardLayout>

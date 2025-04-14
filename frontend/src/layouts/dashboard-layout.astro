@@ -4,7 +4,7 @@ import MainLayout from './main-layout.astro';
 
 const authenticated = await isAuthenticated(Astro.request);
 if (!authenticated) {
-  return Astro.redirect('/login?redirect=' + encodeURIComponent(Astro.url.pathname));
+  return Astro.redirect('/login?redirect=' + encodeURIComponent(Astro.url.pathname) + '&t=' + Date.now());
 }
 
 const { title = 'Dashboard' } = Astro.props;
@@ -16,8 +16,23 @@ const { title = 'Dashboard' } = Astro.props;
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
           <div class="flex">
+            <div class="flex-shrink-0 flex items-center">
+              <a href="/dashboard" class="text-xl font-bold text-blue-600">Dashboard</a>
+            </div>
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <a href="/dashboard" class="border-blue-500 text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                Todos
+              </a>
+              <a href="/dashboard/settings" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                Settings
+              </a>
+              <a href="/dashboard/profile" class="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                Profile
+              </a>
+            </div>
           </div>
           <div class="flex items-center">
+            <span id="username-display" class="mr-4 text-sm text-gray-700">Loading...</span>
             <button id="logout-button" class="ml-3 bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
               Logout
             </button>
@@ -44,15 +59,30 @@ const { title = 'Dashboard' } = Astro.props;
     </div>
   </div>
 </MainLayout>
-
-<script>
-import { clientSideAuth } from '../middleware/auth';
-import { logoutUser } from '../services/auth-service';
-
-clientSideAuth();
-
-document.getElementById('logout-button')?.addEventListener('click', async () => {
-  await logoutUser();
-  window.location.href = '/login';
-});
-</script>
+<!-- <script>
+  import authService from '../services/auth-service';
+  
+  // Handle logout button
+  document.getElementById('logout-button')?.addEventListener('click', async () => {
+    try {
+      await authService.logoutUser();
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Logout failed:', error);
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('sessionId');
+      localStorage.removeItem('user');
+      document.cookie = 'authToken=; path=/; max-age=0';
+      window.location.href = '/login';
+    }
+  });
+  
+  // Only redirect if we're absolutely sure the user isn't authenticated
+  // and we're not already in the process of redirecting
+  if (typeof window !== 'undefined' && 
+      !authService.isAuthenticatedFromBoth() && 
+      !sessionStorage.getItem('redirecting')) {
+    sessionStorage.setItem('redirecting', 'true');
+    window.location.replace('/login?redirect=' + encodeURIComponent(window.location.pathname));
+  }
+  </script> -->

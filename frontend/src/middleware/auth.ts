@@ -2,30 +2,35 @@
 import authService from '../services/auth-service';
 
 export async function isAuthenticated(request: Request): Promise<boolean> {
-  // const cookies = request.headers.get('cookie');
-  // const hasAuthCookie = cookies?.includes('authToken');
-  // nao vou implementar um cookie pra isauthenticated
-  return true;
+  console.log(`request `, request)
+  const cookies = request.headers.entries();
+  console.log(`cookies `, cookies)
+  return true
 }
+
 
 export function clientSideAuth(redirectToLogin = true): boolean {
   if (typeof window !== 'undefined') {
-    const isAuthed = authService.isAuthenticated();
+    const isAuthed = authService.isAuthenticatedFromBoth();
     
-    if (!isAuthed && redirectToLogin) {
-      const currentPath = window.location.pathname;
-      window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+    if (!isAuthed && redirectToLogin && !window.location.pathname.startsWith('/login')) {
+      if (!sessionStorage.getItem('redirecting')) {
+        sessionStorage.setItem('redirecting', 'true');
+        const currentPath = window.location.pathname;
+        window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
+      }
       return false;
     }
-    console.log(`isAuthed `, isAuthed)
+    
+    sessionStorage.removeItem('redirecting');
     return isAuthed;
   }
   return false;
 }
 
+
 export async function checkSession(): Promise<boolean> {
   if (typeof window !== 'undefined' && authService.isAuthenticated()) {
-    console.log(`check session?`)
     try {
       return await authService.refreshSession();
     } catch (error) {
@@ -34,4 +39,17 @@ export async function checkSession(): Promise<boolean> {
     }
   }
   return false;
+}
+
+export function setAuthCookie(token: string): void {
+  if (typeof document !== 'undefined') {
+    document.cookie = `authToken=${token}; path=/; max-age=86400`; // 1 day
+  }
+}
+
+// Helper to remove auth cookie when logging out
+export function removeAuthCookie(): void {
+  if (typeof document !== 'undefined') {
+    document.cookie = 'authToken=; path=/; max-age=0';
+  }
 }
