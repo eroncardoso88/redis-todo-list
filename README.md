@@ -1,5 +1,7 @@
 ![alt text](image.png)
 DEMO
+![alt text](image-1.png)
+DEMO 2
 
 To run this as a developer:
 ```
