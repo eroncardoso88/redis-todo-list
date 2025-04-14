@@ -1,0 +1,16 @@
+---
+import DashboardLayout from '../../layouts/dashboard-layout.astro';
+import { isAuthenticated } from '../../middleware/auth';
+
+const authenticated = await isAuthenticated(Astro.request);
+if (!authenticated) {
+  return Astro.redirect('/login?redirect=' + encodeURIComponent(Astro.url.pathname));
+}
+
+---
+
+<DashboardLayout title="Dashboard Overview">
+  <div class="bg-white shadow sm:rounded-lg">
+    Logged in
+  </div>
+</DashboardLayout>
