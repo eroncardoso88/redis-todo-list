@@ -2,10 +2,10 @@
 import authService from '../services/auth-service';
 
 export async function isAuthenticated(request: Request): Promise<boolean> {
-  const cookies = request.headers.get('cookie');
-  const hasAuthCookie = cookies?.includes('authToken');
-  
-  return !!hasAuthCookie;
+  // const cookies = request.headers.get('cookie');
+  // const hasAuthCookie = cookies?.includes('authToken');
+  // nao vou implementar um cookie pra isauthenticated
+  return true;
 }
 
 export function clientSideAuth(redirectToLogin = true): boolean {
@@ -17,7 +17,7 @@ export function clientSideAuth(redirectToLogin = true): boolean {
       window.location.href = `/login?redirect=${encodeURIComponent(currentPath)}`;
       return false;
     }
-    
+    console.log(`isAuthed `, isAuthed)
     return isAuthed;
   }
   return false;
@@ -25,6 +25,7 @@ export function clientSideAuth(redirectToLogin = true): boolean {
 
 export async function checkSession(): Promise<boolean> {
   if (typeof window !== 'undefined' && authService.isAuthenticated()) {
+    console.log(`check session?`)
     try {
       return await authService.refreshSession();
     } catch (error) {
