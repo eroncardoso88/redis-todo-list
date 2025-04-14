@@ -19,11 +19,10 @@ export class UsersService {
   }
 
   async create(name: string, email: string, password: string): Promise<User> {
-    const existingUser = await this.findOne(name);
+    const existingUser = await this.findOne(email);
     if (existingUser) {
-      throw new ConflictException('Name already exists');
+      throw new ConflictException('Email already exists');
     }
-
     const user = this.usersRepository.create({ name, email, password });
     return this.usersRepository.save(user);
   }
