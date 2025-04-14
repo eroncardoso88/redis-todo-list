@@ -1,11 +1,59 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+// src/pages/login.astro
+import MainLayout from '../layouts/main-layout.astro';
+import { LoginForm } from '../components/auth/login-form';
+import { isAuthenticated } from '../middleware/auth';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Server-side redirect if already logged in
+const authenticated = await isAuthenticated(Astro.request);
+if (authenticated) {
+  return Astro.redirect('/dashboard');
+}
+
+// Get URL parameters
+const url = new URL(Astro.request.url);
+const registrationSuccess = url.searchParams.get('registrationSuccess') === 'true';
+const prefilledUsername = url.searchParams.get('username') || '';
 ---
 
-<Layout>
-	<Welcome />
-</Layout>
+<MainLayout title="Login">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign in to your account
+        </h2>
+        {registrationSuccess && (
+          <p class="mt-2 text-center text-sm text-green-600">
+            Account created successfully! Please sign in with your credentials.
+          </p>
+        )}
+      </div>
+      
+      <LoginForm client:load />
+    </div>
+  </div>
+</MainLayout>
+
+<script define:vars={{ prefilledUsername }}>
+  // Client-side redirect if already logged in
+  import authService from '../services/auth-service';
+  
+  if (authService.isAuthenticated()) {
+    window.location.href = '/dashboard';
+  }
+  
+  // Prefill username if coming from registration
+  if (prefilledUsername) {
+    setTimeout(() => {
+      const emailInput = document.querySelector('input[name="email"]');
+      if (emailInput) {
+        emailInput.value = prefilledUsername;
+        
+        // Trigger change event to update form state
+        const event = new Event('input', { bubbles: true });
+        emailInput.dispatchEvent(event);
+      }
+    }, 100);
+  }
+</script>
