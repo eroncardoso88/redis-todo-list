@@ -1,0 +1,137 @@
+---
+// src/pages/dashboard/profile.astro
+import DashboardLayout from "../../layouts/dashboard-layout.astro";
+import { isAuthenticated } from "../../middleware/auth";
+
+// Server-side protection
+const authenticated = await isAuthenticated(Astro.request);
+if (!authenticated) {
+  return Astro.redirect(
+    "/login?redirect=" + encodeURIComponent(Astro.url.pathname)
+  );
+}
+
+// For client-side usage
+---
+
+<DashboardLayout title="Profile">
+  <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+      <h3 class="text-lg leading-6 font-medium text-gray-900">User Profile</h3>
+      <p class="mt-1 max-w-2xl text-sm text-gray-500">
+        Personal details and preferences
+      </p>
+    </div>
+    <div class="border-t border-gray-200">
+      <dl>
+        <div
+          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+        >
+          <dt class="text-sm font-medium text-gray-500">Full name</dt>
+          <dd
+            id="user-name"
+            class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"
+          >
+            Loading...
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Email address</dt>
+          <dd
+            id="user-email"
+            class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"
+          >
+            Loading...
+          </dd>
+        </div>
+        <div
+          class="bg-gray-50 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6"
+        >
+          <dt class="text-sm font-medium text-gray-500">Member since</dt>
+          <dd
+            id="user-joined"
+            class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2"
+          >
+            Loading...
+          </dd>
+        </div>
+        <div class="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
+          <dt class="text-sm font-medium text-gray-500">Update profile</dt>
+          <dd class="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
+            <form id="profile-form" class="space-y-4">
+              <div>
+                <label
+                  for="fullname"
+                  class="block text-sm font-medium text-gray-700"
+                  >Full Name</label
+                >
+                <input
+                  type="text"
+                  name="fullname"
+                  id="fullname"
+                  class="mt-1 focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
+                />
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Save changes
+                </button>
+              </div>
+            </form>
+          </dd>
+        </div>
+      </dl>
+    </div>
+  </div>
+</DashboardLayout>
+
+<script>
+  // Client-side protection
+  import { clientSideAuth } from "../../middleware/auth";
+import { getCurrentUser } from "../../services/auth-service";
+
+  // Verify client-side auth
+  if (!clientSideAuth()) {
+    window.location.href =
+      "/login?redirect=" + encodeURIComponent(window.location.pathname);
+  }
+
+  // Load user profile data
+  const user = getCurrentUser();
+  if (user) {
+    document.getElementById("user-name").textContent =
+      user.name || "Not provided";
+    document.getElementById("user-email").textContent =
+      user.email || "Not provided";
+
+    // Format date if available
+    const joinedDate = user.createdAt
+      ? new Date(user.createdAt).toLocaleDateString()
+      : "Unknown";
+    document.getElementById("user-joined").textContent = joinedDate;
+
+    // Populate form
+    const fullnameInput = document.getElementById("fullname");
+    if (fullnameInput && user.name) {
+      fullnameInput.value = user.name;
+    }
+  }
+
+  // Handle form submission
+  document
+    .getElementById("profile-form")
+    ?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const fullname = document.getElementById("fullname").value;
+
+      // Here you would call your API to update the user's profile
+      console.log("Updating profile with name:", fullname);
+
+      // Show success message
+      alert("Profile updated successfully!");
+    });
+</script>
