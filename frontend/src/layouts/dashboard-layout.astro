@@ -44,3 +44,15 @@ const { title = 'Dashboard' } = Astro.props;
     </div>
   </div>
 </MainLayout>
+
+<script>
+import { clientSideAuth } from '../middleware/auth';
+import { logoutUser } from '../services/auth-service';
+
+clientSideAuth();
+
+document.getElementById('logout-button')?.addEventListener('click', async () => {
+  await logoutUser();
+  window.location.href = '/login';
+});
+</script>

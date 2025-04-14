@@ -1,0 +1,37 @@
+---
+import MainLayout from '../layouts/main-layout.astro';
+import { SignupForm } from '../components/auth/signup-form';
+import { signupUser } from '../services/auth-service';
+
+if (Astro.request.headers.get('cookie')?.includes('authToken')) {
+  return Astro.redirect('/dashboard');
+}
+
+const handleSignup = async (userData) => {
+  try {
+    await signupUser(userData);
+    window.location.href = '/dashboard';
+  } catch (error) {
+    throw error;
+  }
+};
+---
+
+<MainLayout title="Create Account">
+  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <div>
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create a new account
+        </h2>
+      </div>
+      <SignupForm client:load onSubmit={handleSignup} />
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  if (localStorage.getItem('authToken')) {
+    window.location.href = '/dashboard';
+  }
+</script>
