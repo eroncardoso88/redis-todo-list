@@ -15,8 +15,8 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
+  async validateUser(email: string, password: string): Promise<any> {
+    const user = await this.usersService.findOne(email);
     if (user && await user.validatePassword(password)) {
       const { password, ...result } = user;
       return result;
@@ -25,14 +25,15 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { username: user.username, sub: user.id };
+    const payload = { email: user.email, sub: user.id };
     const accessToken = this.jwtService.sign(payload);
     
     const sessionId = uuidv4();
     
     const sessionData = {
       userId: user.id,
-      username: user.username,
+      name: user.name,
+      email: user.email,
       createdAt: new Date().toISOString(),
     };
     

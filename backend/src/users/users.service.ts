@@ -10,8 +10,8 @@ export class UsersService {
     private usersRepository: Repository<User>,
   ) {}
 
-  async findOne(name: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { name } });
+  async findOne(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({ where: { email } });
   }
 
   async findById(id: number): Promise<User | null> {

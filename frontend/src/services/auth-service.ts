@@ -2,7 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 
 export interface User {
   id: string;
-  username: string;
+  name: string;
 }
 
 export interface AuthResponse {
@@ -11,13 +11,12 @@ export interface AuthResponse {
 }
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
   rememberMe?: boolean;
 }
 
 export interface SignupData {
-  username: string;
   name: string;
   email: string;
   password: string;
@@ -71,7 +70,7 @@ class AuthService {
   async loginUser(credentials: LoginCredentials): Promise<User> {
     try {
       const loginData = {
-        username: credentials.username,
+        email: credentials.email,
         password: credentials.password
       };
 
@@ -103,7 +102,7 @@ class AuthService {
       const createUserResponse = await this.api.post('/users', userData);
       
       const loginResponse = await this.loginUser({
-        username: userData.username || userData.email,
+        email: userData.email,
         password: userData.password
       });
       
