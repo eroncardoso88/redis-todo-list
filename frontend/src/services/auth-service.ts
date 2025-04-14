@@ -55,17 +55,23 @@ class AuthService {
     return localStorage.getItem('sessionId');
   }
 
+
   private setAuthData(token: string, sessionId: string, user: User): void {
     localStorage.setItem('authToken', token);
     localStorage.setItem('sessionId', sessionId);
     localStorage.setItem('user', JSON.stringify(user));
+    
+    document.cookie = `authToken=${token}; path=/; max-age=86400`; // 1 day
   }
-
+  
   private clearAuthData(): void {
     localStorage.removeItem('authToken');
     localStorage.removeItem('sessionId');
     localStorage.removeItem('user');
+    
+    document.cookie = 'authToken=; path=/; max-age=0';
   }
+  
 
   async loginUser(credentials: LoginCredentials): Promise<User> {
     try {

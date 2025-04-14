@@ -41,19 +41,20 @@ export function LoginForm() {
     onSubmit: async ({ value }) => {
       setError("");
       setIsLoading(true);
-
-      console.log(`value `, value)
+    
       try {
-        // Transform the data for the backend which expects username instead of email
         const loginData = {
-          email: value.email, // Email is used as username
+          email: value.email,
           password: value.password,
           rememberMe: value.rememberMe
         };
         
-        await authService.loginUser(loginData);
+        const user = await authService.loginUser(loginData);
         
-        window.location.href = '/dashboard';
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect') || '/dashboard';
+        
+        window.location.href = redirectUrl;
       } catch (err: any) {
         setError(err.message || "Login failed. Please try again.");
       } finally {

@@ -18,3 +18,12 @@ if (!authenticated) {
     </div>
   </div>
 </DashboardLayout>
+
+<script>
+  import authService from '../../services/auth-service';
+  
+  if (typeof window !== 'undefined' && !authService.isAuthenticated()) {
+    const currentPath = window.location.pathname;
+    window.location.replace(`/login?redirect=${encodeURIComponent(currentPath)}`);
+  }
+</script>
