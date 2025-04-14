@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+      - "9229:9229" # Node.js debug port
+    environment:
+      - NODE_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATABASE_URL=sqlite:/app/data/todo.db
+    volumes:
+      - ./backend:/app
+      - /app/node_modules # Don't override node_modules with host's
+      - sqlite-data:/app/data
+    depends_on:
+      - redis
+    restart: unless-stopped
+    command: npm run start:dev
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "4321:4321"
+    environment:
+      - API_URL=http://backend:3000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules # Don't override node_modules with host's
+    depends_on:
+      - backend
+    restart: unless-stopped
+    # Use npx to directly call the locally installed astro
+    command: npx astro dev --host 0.0.0.0
+
+volumes:
+  redis-data:
+  sqlite-data:
