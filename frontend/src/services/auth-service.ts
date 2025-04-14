@@ -99,7 +99,7 @@ class AuthService {
 
   async signupUser(userData: SignupData): Promise<User> {
     try {
-      const createUserResponse = await this.api.post('/users', userData);
+      const createUserResponse = await this.api.post('/users/register', userData);
       
       const loginResponse = await this.loginUser({
         email: userData.email,
@@ -137,6 +137,7 @@ class AuthService {
   }
 
   isAuthenticated(): boolean {
+    console.log(`123?`)
     return !!this.getToken() && !!this.getSessionId();
   }
 
