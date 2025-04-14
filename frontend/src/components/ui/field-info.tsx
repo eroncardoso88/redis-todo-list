@@ -2,13 +2,10 @@ import { getValidationErrorMessage, showValidationError } from '@/src/lib/util/v
 import type { AnyFieldApi } from '@tanstack/react-form'
 
 export function FieldInfo({ field }: { field: AnyFieldApi }) {
-  console.log('no field found! ', field)
   if (!field) {
-    console.log('no field found! ', field)
     return <></>
   }
   if (!field.state) {
-    console.log('no field state found! ', field)
     return <></>
   }
   return (
