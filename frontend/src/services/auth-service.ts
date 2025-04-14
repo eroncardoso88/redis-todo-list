@@ -47,7 +47,7 @@ class AuthService {
     });
   }
 
-  private getToken(): string | null {
+  public getToken(): string | null {
     return localStorage.getItem('authToken');
   }
 
