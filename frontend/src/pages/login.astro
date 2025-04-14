@@ -5,10 +5,6 @@ import { LoginForm } from '../components/auth/login-form';
 import { isAuthenticated } from '../middleware/auth';
 
 // Server-side redirect if already logged in
-const authenticated = await isAuthenticated(Astro.request);
-if (authenticated) {
-  return Astro.redirect('/dashboard');
-}
 
 // Get URL parameters
 const url = new URL(Astro.request.url);
